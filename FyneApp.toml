@@ -1,0 +1,6 @@
+[Details]
+Icon = "assets/icon.png"
+Name = "CodeQLAudit"
+ID = "com.codeqlaudit.app"
+Version = "0.1.0"
+Build = 15
