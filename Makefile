@@ -1,46 +1,69 @@
-# CodeQL 漏洞审计工具 —— 构建与打包
+# CodeQL 漏洞审计工具 —— Wails 版构建与打包
 #
 # 常用命令：
-#   make build          编译到 build/codeql-audit
-#   make run            编译并运行（需先设置 CSV / SRC）
-#   make test           跑全部单元测试
-#   make package-mac    打包成 macOS .app（需 fyne CLI）
-#   make package-win    打包成 Windows .exe（建议在 Windows 上执行）
-#   make package-linux  打包成 Linux 可执行文件（建议在 Linux 上执行）
-#   make fonts          打印中文字体诊断报告
+#   make dev            启动热重载开发（Wails + Vite）
+#   make build          打包当前平台的桌面应用（Wails 2.16+）
+#   make build-fast     跳过前端安装、只重建前端后打包
+#   make test           跑全部 Go 测试
+#   make typecheck      前端 TypeScript 类型检查
 #
-# fyne CLI 安装：go install fyne.io/tools/cmd/fyne@latest
+# 依赖：
+#   Go 1.25+、Node 20+、pnpm 10+、Wails CLI 2.16+
+#   Wails CLI 安装：go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
 APP      := codeql-audit
-BIN_DIR  := build
-FYNE     ?= fyne
-ICON     := assets/icon.png
-CSV      ?= ../pyhackme.csv
-SRC      ?=
+BIN_DIR  := build/bin
+WAILS    ?= wails
+PNPM     ?= pnpm
+FRONTEND := frontend
 
-.PHONY: help build run test vet fmt tidy clean package-mac package-win package-linux fonts cross
+.PHONY: help deps dev build build-fast run test test-core vet fmt tidy typecheck frontend \
+        clean distclean package-mac package-mac-universal package-win package-linux fonts check
 
 help:
 	@echo "可用目标："
-	@echo "  build           编译当前平台可执行文件到 $(BIN_DIR)/$(APP)"
-	@echo "  run             运行（make run CSV=../pyhackme.csv SRC=/path/to/src）"
-	@echo "  test            运行全部测试"
-	@echo "  vet / fmt/tidy  代码检查与格式化"
-	@echo "  fonts           打印中文字体诊断"
-	@echo "  package-mac     macOS .app"
-	@echo "  package-win     Windows .exe"
-	@echo "  package-linux   Linux 可执行文件"
-	@echo "  cross           用 fyne-cross(Docker) 交叉打包 Windows/Linux"
+	@echo "  deps            安装前端依赖（pnpm install）"
+	@echo "  dev             启动 Wails 热重载开发（自动打开窗口）"
+	@echo "  build           打包当前平台桌面应用到 $(BIN_DIR)"
+	@echo "  build-fast      跳过 pnpm install，重建前端后打包"
+	@echo "  run             启动 Wails 开发模式（同 dev）"
+	@echo "  test            跑全部 Go 测试"
+	@echo "  test-core       只跑 internal/* 包测试"
+	@echo "  typecheck       前端 TypeScript 类型检查"
+	@echo "  vet / fmt / tidy"
+	@echo "  frontend        仅构建前端到 $(FRONTEND)/dist"
+	@echo "  fonts           打印 WebView 中文字体说明"
+	@echo "  package-mac     macOS .app（Wails）"
+	@echo "  package-win     Windows 可执行文件（建议在 Windows 上执行）"
+	@echo "  package-linux   Linux 可执行文件（建议在 Linux 上执行）"
+	@echo "  clean / distclean"
+
+deps:
+	cd $(FRONTEND) && $(PNPM) install
+
+frontend:
+	cd $(FRONTEND) && $(PNPM) build
+
+typecheck:
+	cd $(FRONTEND) && $(PNPM) exec tsc --noEmit
+
+dev:
+	$(WAILS) dev
 
 build:
-	@mkdir -p $(BIN_DIR)
-	go build -trimpath -ldflags "-s -w" -o $(BIN_DIR)/$(APP) .
+	$(WAILS) build
+
+build-fast: frontend
+	$(WAILS) build -s
 
 run:
-	go run . -csv "$(CSV)" -src "$(SRC)"
+	$(WAILS) dev
 
 test:
 	go test ./...
+
+test-core:
+	go test ./internal/...
 
 vet:
 	go vet ./...
@@ -54,19 +77,22 @@ tidy:
 fonts:
 	go run . -fonts
 
-clean:
-	rm -rf $(BIN_DIR) $(APP).app $(APP).exe
-
 package-mac:
-	$(FYNE) package -os darwin -icon $(ICON)
+	$(WAILS) build
+
+package-mac-universal:
+	$(WAILS) build -platform darwin/universal
 
 package-win:
-	$(FYNE) package -os windows -icon $(ICON)
+	$(WAILS) build -platform windows/amd64
 
 package-linux:
-	$(FYNE) package -os linux -icon $(ICON)
+	$(WAILS) build -platform linux/amd64
 
-# 在 macOS/Linux 上用 Docker 交叉打包（需先安装 fyne-cross）
-cross:
-	fyne-cross windows -icon $(ICON)
-	fyne-cross linux -icon $(ICON)
+check: fmt vet typecheck test
+
+clean:
+	rm -rf $(BIN_DIR)
+
+distclean: clean
+	rm -rf $(FRONTEND)/dist $(FRONTEND)/node_modules

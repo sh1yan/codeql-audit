@@ -8,9 +8,8 @@ import (
 
 // 本文件实现「可自定义的键盘快捷键」的解析与格式化。
 //
-// 之所以把解析放在 config 而不是 ui：它是纯字符串处理，不依赖 Fyne，
-// 可以单独做单元测试；界面侧（internal/ui/shortcut.go）只负责把解析结果
-// 翻译成 Fyne 的 desktop.CustomShortcut。
+// 解析放在 config 而不是界面层：它是纯字符串处理，可以单独做单元测试；
+// 前端只负责把解析结果映射成键盘事件（KeyboardEvent.key + 修饰键）。
 //
 // 存储格式始终是「修饰键 + '+' + 主键」，例如 Cmd+F、Ctrl+Shift+G、Alt+F3。
 // 解析后再由 String() 统一成规范写法，因此用户写 "shift+cmd+g" 也会被归一成
@@ -22,7 +21,7 @@ import (
 // 二者完全不同；其它平台上 Cmd 对应 Super（Windows 键）。
 type ShortcutSpec struct {
 	// Key 是规范化后的主键：字母 A-Z、数字 0-9、功能键 F1-F12，或符号键的
-	// 字面量（Fyne 中这些符号的 KeyName 就是字符本身，如 "/"、"\\"、"="）。
+	// 字面量（如 "/"、"\\"、"="），与前端 KeyboardEvent.key 一致。
 	Key string
 	// Ctrl 表示 Control 键。
 	Ctrl bool
@@ -51,10 +50,9 @@ func DefaultSearchShortcut() string {
 	return DefaultSearchShortcutOther
 }
 
-// symbolKeys 把用户可能写的符号键名映射到 Fyne 使用的 KeyName。
+// symbolKeys 把用户可能写的符号键名映射到前端 KeyboardEvent.key 使用的字符。
 //
-// 只收录 Fyne 有具名常量的符号（KeySlash/KeyBackslash/KeyMinus/KeyEqual/
-// KeyPeriod/KeyComma/KeySemicolon/KeyLeftBracket/KeyRightBracket/KeySpace/KeyPlus）。
+// 只收录有明确字符表示的符号键（/ \ - = . , ; [ ] 空格 +）。
 // 箭头、Tab 这类键容易被系统或输入框抢先处理，不予支持。
 var symbolKeys = map[string]string{
 	"/":  "/",
@@ -174,7 +172,7 @@ func normalizeShortcutKey(token string) (string, bool) {
 	return "", false
 }
 
-// isFunctionKey 判断是否是 F1-F12（Fyne 只给这 12 个功能键定了常量）。
+// isFunctionKey 判断是否是 F1-F12。
 func isFunctionKey(upper string) bool {
 	if len(upper) < 2 || upper[0] != 'F' {
 		return false

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "codeql-audit",
+  "outputfilename": "codeql-audit",
+  "frontend:install": "pnpm install",
+  "frontend:build": "pnpm build",
+  "frontend:dev:watcher": "pnpm exec vite --port 34115",
+  "frontend:dev:serverUrl": "auto",
+  "author": {
+    "name": "shiyan",
+    "email": ""
+  },
+  "info": {
+    "companyName": "codeql-audit",
+    "productName": "CodeQL 漏洞审计",
+    "productVersion": "0.2.0",
+    "copyright": "GPL-3.0",
+    "comments": "把 CodeQL CSV 变成可点、可跳、可读的审计界面"
+  }
+}

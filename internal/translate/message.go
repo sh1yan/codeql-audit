@@ -42,7 +42,9 @@ func BuildCanonical(segs []model.Segment) (key string, c Canonical, links []*mod
 			c.Vals[k] = append(c.Vals[k], v...)
 		}
 	}
-	c.Key = strings.Join(keys, "\n")
+	// TranslateMessage 查询前会 TrimSpace；这里提前归一化，
+	// 保证 MessageKey、翻译库入库键与查询键三者完全一致。
+	c.Key = strings.TrimSpace(strings.Join(keys, "\n"))
 	return c.Key, c, links
 }
 

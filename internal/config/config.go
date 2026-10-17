@@ -160,8 +160,6 @@ type Config struct {
 	DisplayLang string `json:"display_lang"`
 	// Warning 记录降级信息（不持久化），例如配置目录不可写
 	Warning string `json:"-"`
-	// FontPath 是用户手工指定的中文字体文件（.ttf/.otf/.ttc），留空表示自动探测
-	FontPath string `json:"font_path"`
 	// Editor 是「用编辑器打开」的配置
 	Editor EditorSettings `json:"editor"`
 	// AIVerifySendCode 决定 AI 误报验证时是否把源码片段发给大模型。
@@ -174,7 +172,7 @@ type Config struct {
 	// 用指针是为了区分「老配置里没有这个键」与「用户显式关闭」，缺省值见 AIVerify。
 	AIVerifyEnabled *bool `json:"ai_verify_enabled,omitempty"`
 
-	// TopInfoCollapsed 表示顶栏「项目信息」（结果文件/源码目录/字体）是否被用户折叠。
+	// TopInfoCollapsed 表示顶栏「项目信息」（结果文件/源码目录/定位状态）是否被用户折叠。
 	// 折叠后顶栏只剩工具栏一行，中栏能多出两行代码的高度。
 	TopInfoCollapsed bool `json:"top_info_collapsed,omitempty"`
 	// ShowColumnRuler 决定代码视图顶部是否显示列标尺（定位列标识）。

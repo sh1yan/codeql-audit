@@ -283,6 +283,10 @@ func (e *Engine) Correct(kind, en, zh string) error {
 	if e.store == nil {
 		return fmt.Errorf("翻译库未打开")
 	}
+	if kind == KindMessage {
+		// 与 TranslateMessage 的查询键保持一致：消息模板两端空白不参与匹配。
+		en = strings.TrimSpace(en)
+	}
 	if err := e.store.Save(kind, en, zh, OriginUser); err != nil {
 		return err
 	}
