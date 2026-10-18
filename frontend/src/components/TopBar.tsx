@@ -83,7 +83,7 @@ export function TopBar({
             SECURITY AUDIT CONSOLE
           </span>
         </div>
-        <span className="brand-tag">WAILS</span>
+        <span className="brand-tag">Dev</span>
       </div>
 
       <div className="topbar-sep" />

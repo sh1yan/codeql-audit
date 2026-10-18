@@ -11,7 +11,7 @@
 #   Go 1.25+、Node 20+、pnpm 10+、Wails CLI 2.16+
 #   Wails CLI 安装：go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
-APP      := codeql-audit
+APP      := CodeQL-Audit
 BIN_DIR  := build/bin
 WAILS    ?= wails
 PNPM     ?= pnpm

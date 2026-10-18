@@ -1,7 +1,7 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
-  "name": "codeql-audit",
-  "outputfilename": "codeql-audit",
+  "name": "CodeQL-Audit",
+  "outputfilename": "CodeQL-Audit",
   "frontend:install": "pnpm install",
   "frontend:build": "pnpm build",
   "frontend:dev:watcher": "pnpm exec vite --port 34115",
@@ -11,7 +11,7 @@
     "email": ""
   },
   "info": {
-    "companyName": "codeql-audit",
+    "companyName": "CodeQL-Audit",
     "productName": "CodeQL 漏洞审计",
     "productVersion": "0.2.0",
     "copyright": "GPL-3.0",
